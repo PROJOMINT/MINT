@@ -14,7 +14,7 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local ts = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-
+local TextService = game:GetService("TextService")
 
 local TweenInfo = TweenInfo.new(
 	0.2,
