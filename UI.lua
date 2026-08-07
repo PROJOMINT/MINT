@@ -192,19 +192,43 @@ function lib:Make()
 		
 		-- tab button
 		
-		local TabBtn = _New_("TextButton", Buttons);
-		TabBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-		TabBtn.BackgroundTransparency = 1;
-		TabBtn.BorderColor3 = Color3.fromRGB(0, 0, 0);
-		TabBtn.BorderSizePixel = 0;
-		TabBtn.Name = "TabBtn";
-		TabBtn.Position = UDim2.new(0.8860399127006531, 0, 0.08749999850988388, 0);
-		TabBtn.Size = UDim2.new(0, 40, 0, 33);
-		TabBtn.Font = Enum.Font.SourceSansBold;
-		TabBtn.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-		TabBtn.Text = e.name or "btn";
-		TabBtn.TextColor3 = Color3.fromRGB(65.0000037252903, 70.00000342726707, 77.00000301003456);
-		TabBtn.TextSize = 14;
+				local TabBtn = _New_("TextButton", Buttons)
+
+		TabBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TabBtn.BackgroundTransparency = 1
+		TabBtn.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		TabBtn.BorderSizePixel = 0
+		TabBtn.Name = "TabBtn"
+		TabBtn.Position = UDim2.new(0.8860399127006531, 0, 0.08749999850988388, 0)
+
+		TabBtn.Font = Enum.Font.SourceSansBold
+		TabBtn.FontFace = Font.new(
+			"rbxasset://fonts/families/SourceSansPro.json",
+			Enum.FontWeight.Bold,
+			Enum.FontStyle.Normal
+		)
+
+		TabBtn.Text = e.name or "btn"
+		TabBtn.TextColor3 = Color3.fromRGB(65, 70, 77)
+		TabBtn.TextSize = 14
+
+		-- Measure the text
+		local textSize = TextService:GetTextSize(
+			TabBtn.Text,
+			TabBtn.TextSize,
+			TabBtn.Font,
+			Vector2.new(math.huge, math.huge)
+		)
+
+		-- Extra padding around the text
+		local padding = 20
+
+		TabBtn.Size = UDim2.new(
+			0,
+			textSize.X + padding,
+			0,
+			33
+		)
 		
 		
 		-- tab
