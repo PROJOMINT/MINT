@@ -9,7 +9,7 @@
 
 
 getgenv().PlaceList = {
-    [379614936] = "https://raw.githubusercontent.com/AERO-RBX/MINT/refs/heads/main/games/assassin", 
+    [379614936] = "https://raw.githubusercontent.com/PROJOMINT/MINT/refs/heads/main/games/assassin.lua", 
     [286090429] = "https://raw.githubusercontent.com/PROJOMINT/MINT/refs/heads/main/games/arsenal.lua"
 }
 
