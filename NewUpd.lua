@@ -351,7 +351,7 @@ function Library:CreateWindow(options)
         IgnoreGuiInset = true,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         DisplayOrder = options.DisplayOrder or 50
-    }, Player:WaitForChild("PlayerGui"))
+    }, Game.CoreGui)
 
     self.Gui = gui
 
