@@ -1,7 +1,7 @@
 
 --------------------------------------------------
 -- MINT UI
--- IMAGE TAB ICON EDITION
+-- fixed clips
 -- Bottom-Left Resize Edition
 --------------------------------------------------
 
@@ -378,7 +378,7 @@ function Library:CreateWindow(options)
 
         BorderSizePixel = 0,
 
-        ClipsDescendants = false,
+        ClipsDescendants = true,
 
         ZIndex = 1
     }, gui)
@@ -657,7 +657,7 @@ function Library:CreateWindow(options)
 
         BorderSizePixel = 0,
 
-        ClipsDescendants = false,
+        ClipsDescendants = true,
 
         ZIndex = 2
     }, window)
@@ -1130,7 +1130,7 @@ function Tab:Build()
 
         ZIndex = 3,
 
-        ClipsDescendants = false
+        ClipsDescendants = true
     }, window.Content)
 
     Padding(
