@@ -3,7 +3,7 @@
 
 --------------------------------------------------
 -- MINT UI
--- fixed clips
+-- fixed clips2
 -- CoreGui fix
 -- Bottom-Left Resize Edition
 --------------------------------------------------
@@ -3140,6 +3140,7 @@ function Section:CreateColorPicker(options)
 
     apply.MouseButton1Click:Connect(function()
         applyRGB()
+        element:Close()
     end)
 
     rgbBox.FocusLost:Connect(function()
