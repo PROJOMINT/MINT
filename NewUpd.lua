@@ -1,12 +1,17 @@
 
+
+
 --------------------------------------------------
 -- MINT UI
--- fixed clips
+--LUNR UPDATE NOTES
+-- fixed clips2
+-- updated color picker
 -- CoreGui fix
 -- Bottom-Left Resize Edition
 --------------------------------------------------
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
@@ -2553,16 +2558,17 @@ function Section:CreateColorPicker(options)
     ------------------------------------------------------------
 
     local picker = New("Frame", {
-        AnchorPoint = Vector2.new(1, 0),
-        Position = UDim2.new(1, 0, 1, 8),
+        Name = "FloatingColorPicker",
+        AnchorPoint = Vector2.new(0, 0),
+        Position = UDim2.fromOffset(0, 0),
         Size = UDim2.fromOffset(275, 285),
         BackgroundColor3 = Library.Theme.Panel2,
         BorderSizePixel = 0,
         Visible = false,
         ClipsDescendants = false,
         Active = true,
-        ZIndex = 500
-    }, row)
+        ZIndex = 1000
+    }, self.Tab.Window.Gui)
 
     Corner(picker, 8)
 
@@ -3136,11 +3142,61 @@ function Section:CreateColorPicker(options)
 
     apply.MouseButton1Click:Connect(function()
         applyRGB()
+        element:Close()
     end)
 
     rgbBox.FocusLost:Connect(function()
         applyRGB()
     end)
+
+    ------------------------------------------------------------
+    -- FLOATING PICKER POSITIONING
+    ------------------------------------------------------------
+
+    local pickerPositionConnection
+
+    local function updatePickerPosition()
+        if not picker.Visible then
+            return
+        end
+
+        local camera = workspace.CurrentCamera
+        if not camera then
+            return
+        end
+
+        local viewport = camera.ViewportSize
+        local buttonPosition = colorButton.AbsolutePosition
+        local buttonSize = colorButton.AbsoluteSize
+        local pickerSize = picker.AbsoluteSize
+
+        local x = buttonPosition.X + buttonSize.X - pickerSize.X
+        local y = buttonPosition.Y + buttonSize.Y + 8
+
+        -- Prefer below the button, but flip above it when necessary.
+        if y + pickerSize.Y > viewport.Y - 8 then
+            y = buttonPosition.Y - pickerSize.Y - 8
+        end
+
+        -- Keep the picker inside the screen horizontally.
+        x = math.clamp(
+            x,
+            8,
+            math.max(8, viewport.X - pickerSize.X - 8)
+        )
+
+        -- Keep the picker inside the screen vertically.
+        y = math.clamp(
+            y,
+            8,
+            math.max(8, viewport.Y - pickerSize.Y - 8)
+        )
+
+        picker.Position = UDim2.fromOffset(
+            math.floor(x),
+            math.floor(y)
+        )
+    end
 
     ------------------------------------------------------------
     -- OPEN
@@ -3153,10 +3209,20 @@ function Section:CreateColorPicker(options)
         end
 
         element.IsOpen = true
-
         picker.Visible = true
 
         updateVisuals()
+        updatePickerPosition()
+
+        if pickerPositionConnection then
+            pickerPositionConnection:Disconnect()
+        end
+
+        pickerPositionConnection = RunService.RenderStepped:Connect(function()
+            if element.IsOpen then
+                updatePickerPosition()
+            end
+        end)
     end
 
     ------------------------------------------------------------
@@ -3170,8 +3236,12 @@ function Section:CreateColorPicker(options)
         end
 
         element.IsOpen = false
-
         picker.Visible = false
+
+        if pickerPositionConnection then
+            pickerPositionConnection:Disconnect()
+            pickerPositionConnection = nil
+        end
     end
 
     ------------------------------------------------------------
@@ -3809,11 +3879,5 @@ function Window:Destroy()
     end
 end
 
---------------------------------------------------
--- EXAMPLE
---------------------------------------------------
--- Roblox's Creator Hub documentation uses these
--- image assets in its ImageLabel examples.
---------------------------------------------------
 
 return Library
