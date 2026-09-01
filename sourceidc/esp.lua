@@ -1,5 +1,5 @@
 -- if you skid this without credits your a pussy
-
+-- updated with skeleton esp maybe
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -15,6 +15,7 @@ ESPSettings.box3dESP = ESPSettings.box3dESP or false
 ESPSettings.nameESP = ESPSettings.nameESP or false
 ESPSettings.glowESP = ESPSettings.glowESP or false
 ESPSettings.tracerESP = ESPSettings.tracerESP or false
+ESPSettings.skeletonESP = ESPSettings.skeletonESP or false
 ESPSettings.teamCheck = ESPSettings.teamCheck or false
 ESPSettings.masterColor = ESPSettings.masterColor or false
 
@@ -23,6 +24,7 @@ ESPSettings.nameColor = ESPSettings.nameColor or Color3.fromRGB(255, 255, 255)
 ESPSettings.mainColor = ESPSettings.mainColor or Color3.fromRGB(0, 255, 0)
 ESPSettings.glowColor = ESPSettings.glowColor or Color3.fromRGB(0, 255, 255)
 ESPSettings.tracerColor = ESPSettings.tracerColor or Color3.fromRGB(255, 255, 0)
+ESPSettings.skeletonColor = ESPSettings.skeletonColor or Color3.fromRGB(255, 255, 255)
 
 -- SAFETY WRAPPER
 local function SafeColor(c)
@@ -37,6 +39,7 @@ local NameESPLabels = {}
 local Box3DLines = {}
 local GlowESP = {}
 local Tracers = {}
+local SkeletonESP = {}
 
 ------------------------------------------
 -- 3D BOX FUNCTIONS
@@ -361,6 +364,126 @@ local function UpdateTracer(character, hrp, camera)
 end
 
 ------------------------------------------
+-- SKELETON ESP FUNCTIONS
+------------------------------------------
+
+-- R15 body connections.
+local SkeletonConnections = {
+    {"Head", "UpperTorso"},
+    {"UpperTorso", "LowerTorso"},
+
+    {"UpperTorso", "LeftUpperArm"},
+    {"LeftUpperArm", "LeftLowerArm"},
+    {"LeftLowerArm", "LeftHand"},
+
+    {"UpperTorso", "RightUpperArm"},
+    {"RightUpperArm", "RightLowerArm"},
+    {"RightLowerArm", "RightHand"},
+
+    {"LowerTorso", "LeftUpperLeg"},
+    {"LeftUpperLeg", "LeftLowerLeg"},
+    {"LeftLowerLeg", "LeftFoot"},
+
+    {"LowerTorso", "RightUpperLeg"},
+    {"RightUpperLeg", "RightLowerLeg"},
+    {"RightLowerLeg", "RightFoot"},
+}
+
+local function CreateSkeleton(character)
+    if not character then
+        return
+    end
+
+    if SkeletonESP[character] then
+        return
+    end
+
+    SkeletonESP[character] = {}
+
+    for i = 1, #SkeletonConnections do
+        local line = Drawing.new("Line")
+
+        line.Visible = false
+        line.Thickness = 1.5
+        line.Color = SafeColor(ESPSettings.skeletonColor)
+
+        SkeletonESP[character][i] = line
+    end
+end
+
+local function RemoveSkeleton(character)
+    if SkeletonESP[character] then
+        for _, line in ipairs(SkeletonESP[character]) do
+            pcall(function()
+                line:Remove()
+            end)
+        end
+
+        SkeletonESP[character] = nil
+    end
+end
+
+local function UpdateSkeleton(character, camera)
+    if not character or not camera then
+        return
+    end
+
+    local lines = SkeletonESP[character]
+
+    if not lines then
+        return
+    end
+
+    local color = SafeColor(
+        ESPSettings.masterColor
+            and ESPSettings.mainColor
+            or ESPSettings.skeletonColor
+    )
+
+    for i, connection in ipairs(SkeletonConnections) do
+        local line = lines[i]
+
+        if not line then
+            continue
+        end
+
+        local part1 = character:FindFirstChild(connection[1])
+        local part2 = character:FindFirstChild(connection[2])
+
+        if part1 and part2 then
+            local pos1, visible1 =
+                camera:WorldToViewportPoint(part1.Position)
+
+            local pos2, visible2 =
+                camera:WorldToViewportPoint(part2.Position)
+
+            if visible1
+                and visible2
+                and pos1.Z > 0
+                and pos2.Z > 0
+            then
+                line.Visible = ESPSettings.skeletonESP
+                line.Color = color
+
+                line.From = Vector2.new(
+                    pos1.X,
+                    pos1.Y
+                )
+
+                line.To = Vector2.new(
+                    pos2.X,
+                    pos2.Y
+                )
+            else
+                line.Visible = false
+            end
+        else
+            line.Visible = false
+        end
+    end
+end
+
+------------------------------------------
 -- TEAM CHECK
 ------------------------------------------
 
@@ -390,6 +513,7 @@ local function CleanupCharacter(character)
     Remove3DBox(character)
     RemoveGlow(character)
     RemoveTracer(character)
+    RemoveSkeleton(character)
 end
 
 ------------------------------------------
@@ -414,6 +538,7 @@ local function OnCharacterAdded(character)
         Create3DBox(character)
         CreateGlow(character)
         CreateTracer(character)
+        CreateSkeleton(character)
 
         humanoid.Died:Connect(function()
             CleanupCharacter(character)
@@ -493,7 +618,10 @@ RunService.RenderStepped:Connect(function()
                         pos.Y - height / 2
                     )
 
-                    box.Size = Vector2.new(width, height)
+                    box.Size = Vector2.new(
+                        width,
+                        height
+                    )
 
                     box.Color = SafeColor(
                         ESPSettings.masterColor
@@ -533,7 +661,10 @@ RunService.RenderStepped:Connect(function()
 
                 if onScreen and pos.Z > 0 then
                     label.Visible = true
-                    label.Position = Vector2.new(pos.X, pos.Y)
+                    label.Position = Vector2.new(
+                        pos.X,
+                        pos.Y
+                    )
 
                     label.Color = SafeColor(
                         ESPSettings.masterColor
@@ -566,7 +697,11 @@ RunService.RenderStepped:Connect(function()
             local hrp = character:FindFirstChild("HumanoidRootPart")
 
             if hrp then
-                Update3DBox(character, hrp, camera)
+                Update3DBox(
+                    character,
+                    hrp,
+                    camera
+                )
             else
                 for _, line in ipairs(lines) do
                     line.Visible = false
@@ -613,12 +748,39 @@ RunService.RenderStepped:Connect(function()
             local hrp = character:FindFirstChild("HumanoidRootPart")
 
             if hrp then
-                UpdateTracer(character, hrp, camera)
+                UpdateTracer(
+                    character,
+                    hrp,
+                    camera
+                )
             else
                 line.Visible = false
             end
         else
             line.Visible = false
+        end
+    end
+
+    ------------------------------------------
+    -- SKELETON ESP
+    ------------------------------------------
+
+    for character, lines in pairs(SkeletonESP) do
+        local player = Players:GetPlayerFromCharacter(character)
+
+        if player
+            and character.Parent
+            and ESPSettings.skeletonESP
+            and IsEnemy(player)
+        then
+            UpdateSkeleton(
+                character,
+                camera
+            )
+        else
+            for _, line in ipairs(lines) do
+                line.Visible = false
+            end
         end
     end
 end)
@@ -645,6 +807,10 @@ end
 
 function ESP:SetTracerESP(b)
     ESPSettings.tracerESP = b
+end
+
+function ESP:SetSkeletonESP(b)
+    ESPSettings.skeletonESP = b
 end
 
 function ESP:SetTeamCheck(b)
@@ -675,6 +841,10 @@ function ESP:SetTracerColor(c)
     ESPSettings.tracerColor = SafeColor(c)
 end
 
+function ESP:SetSkeletonColor(c)
+    ESPSettings.skeletonColor = SafeColor(c)
+end
+
 ------------------------------------------
 -- TOGGLE FUNCTIONS
 ------------------------------------------
@@ -697,6 +867,10 @@ end
 
 function ESP:ToggleTracerESP()
     ESPSettings.tracerESP = not ESPSettings.tracerESP
+end
+
+function ESP:ToggleSkeletonESP()
+    ESPSettings.skeletonESP = not ESPSettings.skeletonESP
 end
 
 function ESP:ToggleTeamCheck()
