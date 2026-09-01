@@ -1,5 +1,5 @@
 -- if you skid this without credits your a pussy
--- updated with skeleton esp maybe
+-- updated with skeleton esp
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
